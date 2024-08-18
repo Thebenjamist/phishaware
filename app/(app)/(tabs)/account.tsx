@@ -1,14 +1,10 @@
-// index.tsx
-import { Text, View, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
 import { useSession } from "@/services/ctx";
+import { useRouter } from "expo-router";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
-export default function Index() {
-  const { signOut, session } = useSession();
+export default function Tab() {
   const router = useRouter();
-
-  // console.log("session", session ? JSON.parse(session).idToken : "");
-
+  const { signOut } = useSession();
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <Text
@@ -28,3 +24,11 @@ export default function Index() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

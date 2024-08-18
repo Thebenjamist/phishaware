@@ -132,7 +132,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
         setSession(storedSession);
       } else {
         setSession(null);
-        router.push("/sign-in");
+        router.push("/welcome");
       }
       setIsLoading(false);
     })();
@@ -167,7 +167,6 @@ export function SessionProvider({ children }: PropsWithChildren) {
         },
         onFailure: (err) => {
           setIsLoading(false);
-          console.error(err);
           reject(err);
         },
       });
@@ -182,7 +181,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
       i++;
     }
     setSession(null);
-    router.push("/sign-in"); // Redirect to login on sign out
+    router.push("/welcome");
   };
 
   return (

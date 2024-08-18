@@ -1,33 +1,90 @@
+import React, { useState } from "react";
 import { router } from "expo-router";
-import { Text, TouchableOpacity, View } from "react-native";
-
+import {
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Image,
+  Keyboard,
+  ScrollView,
+  StatusBar,
+} from "react-native";
 import { useSession } from "@/services/ctx";
+import { commonStyles as styles } from "@/assets/styles";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import ScreenLayout from "@/components/ScreenLayout";
 
 export default function SignIn() {
   const { signIn, session, isLoading } = useSession();
-  console.log("Is loading", isLoading);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSignIn = () => {
+    Keyboard.dismiss();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !password) {
+      setError("Email and password are required.");
+      return;
+    }
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    signIn(email, password)
+      .then(() => {
+        router.replace("/");
+      })
+      .catch((err) => {
+        setError(`Failed to sign in. ${err.message}`);
+      });
+  };
+
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text
-        onPress={() => {
-          signIn("benho061995@gmail.com", "TestPassword123!").then(() => {
-            router.replace("/");
-          });
-          // Navigate after signing in. You may want to tweak this to ensure sign-in is
-          // successful before navigating.
-        }}
-      >
-        Sign In
-      </Text>
+    <ScreenLayout>
+      <Image source={require("@/assets/images/icon.png")} style={styles.logo} />
+      {isLoading ? (
+        <LoadingSpinner fullscreen={false} />
+      ) : (
+        <>
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={(text) => {
+              setEmail(text);
+              setError("");
+            }}
+            onFocus={() => setError("")}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            value={password}
+            onChangeText={(text) => {
+              setPassword(text);
+              setError("");
+            }}
+            onFocus={() => setError("")}
+            secureTextEntry
+          />
+          <TouchableOpacity style={styles.button} onPress={handleSignIn}>
+            <Text style={styles.buttonText}>Login</Text>
+          </TouchableOpacity>
 
-      {isLoading && <Text>Loading...</Text>}
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-      <TouchableOpacity
-        onPress={() => router.push("/about")}
-        style={{ marginTop: 20 }}
-      >
-        <Text>Go to About</Text>
-      </TouchableOpacity>
-    </View>
+          <TouchableOpacity onPress={() => router.push("/forgot-password")}>
+            <Text style={styles.link}>Forgot Password?</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push("/sign-up")}>
+            <Text style={styles.link}>Register</Text>
+          </TouchableOpacity>
+        </>
+      )}
+    </ScreenLayout>
   );
 }
