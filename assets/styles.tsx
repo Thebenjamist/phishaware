@@ -29,6 +29,13 @@ export const commonStyles = StyleSheet.create({
     borderRadius: 16,
     alignItems: "center",
   },
+  buttonAlt: {
+    width: "100%",
+    padding: 15,
+    backgroundColor: "#4A5759",
+    borderRadius: 16,
+    alignItems: "center",
+  },
   buttonSpacing: {
     marginBottom: 10,
   },
@@ -87,6 +94,12 @@ export const commonStyles = StyleSheet.create({
   },
 
   passwordPolicy: {
+    marginBottom: 20,
+  },
+
+  modalHeader: {
+    fontWeight: "bold",
+    fontSize: 16,
     marginBottom: 20,
   },
 });

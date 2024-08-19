@@ -6,8 +6,11 @@ import ScreenLayout from "@/components/ScreenLayout";
 export default function Tab() {
   const { signOut, session } = useSession();
   return (
-    <ScreenLayout>
-      <Text>Tab [Home|Settings]</Text>
-    </ScreenLayout>
+    <>
+      <Text>Hello</Text>
+      <ScreenLayout>
+        <Text>Tab [Home|Settings]</Text>
+      </ScreenLayout>
+    </>
   );
 }

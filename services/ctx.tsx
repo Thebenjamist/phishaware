@@ -98,7 +98,7 @@ async function refreshSession(session: string | null): Promise<string | null> {
     user.refreshSession(cognitoRefreshToken, (err, session) => {
       if (err) {
         console.log("Error refreshing session", err);
-        reject(null);
+        resolve(null);
       } else {
         console.log("Session refreshed");
         const idToken = session.getIdToken().getJwtToken();
