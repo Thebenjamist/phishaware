@@ -20,7 +20,9 @@ expo-env.d.ts
 # @end expo-cli
 
 *.aab
-
+.git
 android
+ios
 
-.env
+
+# .env

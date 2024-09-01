@@ -48,3 +48,49 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+```
+phishaware
+├─ .env
+├─ app
+│  ├─ (app)
+│  │  ├─ (tabs)
+│  │  │  ├─ _layout.tsx
+│  │  │  ├─ account.tsx
+│  │  │  ├─ index.tsx
+│  │  │  └─ learning.tsx
+│  │  ├─ _layout.tsx
+│  │  ├─ about.tsx
+│  │  ├─ mock.tsx
+│  │  └─ report.tsx
+│  ├─ _layout.tsx
+│  ├─ confirm-reset-password.tsx
+│  ├─ forgot-password.tsx
+│  ├─ sign-in.tsx
+│  ├─ sign-up.tsx
+│  └─ welcome.tsx
+├─ app.json
+├─ assets
+│  ├─ fonts
+│  │  └─ SpaceMono-Regular.ttf
+│  ├─ images
+│  │  ├─ adaptive-icon.png
+│  │  ├─ favicon.png
+│  │  ├─ icon.png
+│  │  ├─ partial-react-logo.png
+│  │  ├─ react-logo.png
+│  │  ├─ react-logo@2x.png
+│  │  ├─ react-logo@3x.png
+│  │  └─ splash.png
+│  └─ styles.tsx
+├─ components
+│  ├─ CustomModal.tsx
+│  ├─ LoadingSpinner.tsx
+│  ├─ ScreenLayout.tsx
+│  └─ StatsPieChart.tsx
+├─ services
+│  ├─ api.tsx
+│  ├─ cognito.tsx
+│  ├─ ctx.tsx
+│  └─ secretStorage.ts
+```

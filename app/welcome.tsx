@@ -1,15 +1,7 @@
 import React from "react";
 import { router } from "expo-router";
-import {
-  Text,
-  TouchableOpacity,
-  View,
-  Image,
-  ScrollView,
-  StatusBar as NativeStatusBar,
-} from "react-native";
+import { Text, TouchableOpacity, Image } from "react-native";
 import { commonStyles as styles } from "@/assets/styles";
-import { StatusBar } from "expo-status-bar";
 import ScreenLayout from "@/components/ScreenLayout";
 
 export default function Welcome() {
@@ -27,7 +19,7 @@ export default function Welcome() {
         style={styles.button}
         onPress={() => router.push("/sign-up")}
       >
-        <Text style={styles.buttonText}>Register</Text>
+        <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
     </ScreenLayout>
   );

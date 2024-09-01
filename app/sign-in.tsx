@@ -72,7 +72,7 @@ export default function SignIn() {
             secureTextEntry
           />
           <TouchableOpacity style={styles.button} onPress={handleSignIn}>
-            <Text style={styles.buttonText}>Login</Text>
+            <Text style={styles.buttonText}>Sign In</Text>
           </TouchableOpacity>
 
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
@@ -81,7 +81,7 @@ export default function SignIn() {
             <Text style={styles.link}>Forgot Password?</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push("/sign-up")}>
-            <Text style={styles.link}>Register</Text>
+            <Text style={styles.link}>Sign Up</Text>
           </TouchableOpacity>
         </>
       )}

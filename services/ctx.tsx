@@ -12,18 +12,30 @@ import {
   useState,
 } from "react";
 import * as SecureStore from "expo-secure-store";
-import { useRouter } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
+import api from "./api";
+import { getSession, saveSession } from "./secretStorage";
+
+export type User = {
+  id: string;
+  email: string;
+  firstTimeOpen: boolean;
+};
 
 const AuthContext = createContext<{
   signIn: (username: string, password: string) => Promise<void>;
   signOut: () => void;
   session?: string | null;
   isLoading: boolean;
+  user: User | null;
+  fetchUser: () => Promise<void>;
 }>({
   signIn: async () => {},
   signOut: () => null,
   session: null,
   isLoading: false,
+  user: null,
+  fetchUser: async () => {},
 });
 
 export function useSession() {
@@ -37,30 +49,7 @@ export function useSession() {
   return value;
 }
 
-async function saveSession(key: string, value: string) {
-  const chunkSize = 2048;
-  const numChunks = Math.ceil(value.length / chunkSize);
-  for (let i = 0; i < numChunks; i++) {
-    const chunk = value.slice(i * chunkSize, (i + 1) * chunkSize);
-    await SecureStore.setItemAsync(`${key}_chunk${i}`, chunk);
-  }
-  await SecureStore.setItemAsync(`${key}_numChunks`, numChunks.toString());
-}
-
-async function getSession(key: string) {
-  const numChunks = parseInt(
-    (await SecureStore.getItemAsync(`${key}_numChunks`)) || "0"
-  );
-  let value = "";
-  for (let i = 0; i < numChunks; i++) {
-    const chunk = await SecureStore.getItemAsync(`${key}_chunk${i}`);
-    value += chunk;
-  }
-  return value;
-}
-
 function isSessionValid(session: string | null): boolean {
-  console.info("Checking for valid session");
   if (!session) return false;
   const { idToken } = JSON.parse(session);
   const jwtPayload = JSON.parse(atob(idToken.split(".")[1]));
@@ -78,7 +67,6 @@ function isSessionValid(session: string | null): boolean {
 }
 
 async function refreshSession(session: string | null): Promise<string | null> {
-  console.log("Refreshing session");
   if (!session) return null;
   const sessionData = JSON.parse(session);
 
@@ -92,15 +80,11 @@ async function refreshSession(session: string | null): Promise<string | null> {
     RefreshToken: refreshToken,
   });
 
-  console.log("Refreshing session with token:", cognitoRefreshToken);
-
   return new Promise<string | null>((resolve, reject) => {
     user.refreshSession(cognitoRefreshToken, (err, session) => {
       if (err) {
-        console.log("Error refreshing session", err);
         resolve(null);
       } else {
-        console.log("Session refreshed");
         const idToken = session.getIdToken().getJwtToken();
         const accessToken = session.getAccessToken().getJwtToken();
         const newSessionData = JSON.stringify({
@@ -108,7 +92,6 @@ async function refreshSession(session: string | null): Promise<string | null> {
           accessToken,
           refreshToken: cognitoRefreshToken.getToken(),
         });
-        console.log("New session data:", newSessionData);
         saveSession("session", newSessionData).then(() => {
           resolve(newSessionData);
         });
@@ -121,6 +104,17 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const [isLoading, setIsLoading] = useState(true);
   const [session, setSession] = useState<string | null>(null);
   const router = useRouter();
+  const segments = useSegments();
+  const [user, setUser] = useState<User | null>(null);
+
+  const fetchUser = async () => {
+    const data = await api("/profile", "GET")
+      .then((res) => {
+        setUser(res.data);
+        return res;
+      })
+      .catch(console.error);
+  };
 
   useEffect(() => {
     (async () => {
@@ -130,13 +124,16 @@ export function SessionProvider({ children }: PropsWithChildren) {
       }
       if (storedSession) {
         setSession(storedSession);
+        if (!user) {
+          await fetchUser();
+        }
       } else {
         setSession(null);
         router.push("/welcome");
       }
       setIsLoading(false);
     })();
-  }, []);
+  }, [segments]);
 
   const signIn = async (username: string, password: string) => {
     setIsLoading(true);
@@ -161,6 +158,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
             refreshToken,
           });
           await saveSession("session", sessionData);
+          await fetchUser();
+
           setSession(sessionData);
           setIsLoading(false);
           resolve();
@@ -181,6 +180,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
       i++;
     }
     setSession(null);
+    setUser(null);
     router.push("/welcome");
   };
 
@@ -191,6 +191,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
         signOut,
         session,
         isLoading,
+        user,
+        fetchUser,
       }}
     >
       {children}

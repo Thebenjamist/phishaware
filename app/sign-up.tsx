@@ -172,7 +172,7 @@ export default function SignUp() {
           />
 
           <TouchableOpacity style={styles.button} onPress={handleSignUp}>
-            <Text style={styles.buttonText}>Register</Text>
+            <Text style={styles.buttonText}>Sign Up</Text>
           </TouchableOpacity>
 
           {error ? <Text style={styles.errorText}>{error}</Text> : null}

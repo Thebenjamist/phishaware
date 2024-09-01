@@ -66,6 +66,7 @@ export const confirmPasswordWithCognito = async (
         resolve(result);
       },
       onFailure: (err) => {
+        console.log(err);
         reject(err);
       },
     });

@@ -8,16 +8,18 @@ const ScreenLayout = ({
   children,
   topAligned,
   noPadding,
+  noMargin,
 }: {
   children: ReactNode;
   topAligned?: boolean;
   noPadding?: boolean;
+  noMargin?: boolean;
 }) => {
   return (
     <ScrollView
       style={{
         flex: 1,
-        marginTop: NativeStatusBar.currentHeight,
+        marginTop: noMargin ? 0 : NativeStatusBar.currentHeight,
       }}
       contentContainerStyle={[
         styles.container,
