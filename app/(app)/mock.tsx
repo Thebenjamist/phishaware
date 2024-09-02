@@ -9,7 +9,6 @@ import {
   StatusBar,
 } from "react-native";
 import { commonStyles as styles } from "@/assets/styles";
-import { useSession } from "@/services/ctx";
 import ScreenLayout from "@/components/ScreenLayout";
 import { FontAwesome } from "@expo/vector-icons";
 import { Stats } from "@/components/StatsPieChart";
@@ -18,7 +17,6 @@ import { router } from "expo-router";
 import api from "@/services/api";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
-// Define the 'Email' type if it doesn't exist
 type Email = {
   id: string;
   senderEmail: string;
@@ -39,154 +37,7 @@ type scoreItem = {
   phishingType?: "A" | "B" | "C" | null;
 };
 
-const mockEmails: Email[] = [
-  {
-    id: "1",
-    senderEmail: "john.doe@example.com",
-    senderName: "John Doe",
-    subject: "Meeting Reminder",
-    messageGreeting: "Good day,",
-    messageClosing: "Best regards,",
-    messageBody:
-      "This is a reminder about our upcoming meeting on [Meeting topic] scheduled for [Date and Time]. Please come prepared to discuss [Meeting agenda points].",
-    isPhishing: false,
-    phishingType: "A",
-  },
-  {
-    id: "2",
-    senderEmail: "company.announcements@notyourcompany.com", // Spoofed sender email
-    senderName: "Important Announcements (NOT Your Company)", // Dodgy sender name
-    subject: "Urgent Action Required: Secure Your Account!", // Urgent subject line
-    messageGreeting: "Dear User,", // Generic greeting
-    messageClosing: "Sincerely,", // Common closing
-    messageBody:
-      "We detected suspicious activity on your account. Click the link below to verify your identity and avoid account suspension: [Suspicious URL]", // Phishing link
-    isPhishing: true,
-    phishingType: "A",
-  },
-  {
-    id: "3",
-    senderEmail: "alex.wong@example.com",
-    senderName: "Alex Wong",
-    subject: "Urgent Request",
-    messageGreeting: "Hi,",
-    messageClosing: "Best regards,",
-    messageBody:
-      "I need your help urgently with a confidential project. Please reply to this email with your login credentials for [Internal system name] so I can grant you access. Thanks, Alex.", // Requests login credentials
-    isPhishing: true,
-    phishingType: "B",
-  },
-  {
-    id: "4",
-    senderEmail: "emily.jones@externalcompany.com", // Sender email from a different company
-    senderName: "Emily Jones",
-    subject: "Vacation Request Approved! (But There's a Catch...)", // Enticing subject line with urgency
-    messageGreeting: "Dear [Your name],", // Personalized greeting
-    messageClosing: "Congratulations Again,", // Unusual closing
-    messageBody:
-      "We're thrilled to approve your vacation request for June 1st to June 10th! To finalize the approval, please complete our short online survey by clicking here: [Suspicious URL]. Don't miss out on this opportunity!", // Phishing link with urgency
-    isPhishing: true,
-    phishingType: "B",
-  },
-  {
-    id: "5",
-    senderEmail: "michael.ng@example.com",
-    senderName: "Michael Ng",
-    subject: "Project Update",
-    messageGreeting: "Hi team,",
-    messageClosing: "Thanks,",
-    messageBody:
-      "Just a quick update on the project. We are making good progress and are on track to meet the deadline. Keep up the great work!",
-    isPhishing: false,
-    phishingType: "C",
-  },
-  {
-    id: "6",
-    senderEmail: "billing@fakecompany.com", // Sender email from a fake company
-    senderName: "Payments Department", // Generic sender name
-    subject: "Urgent Overdue Invoice: Late Payment Penalty!", // Urgent subject line with penalty
-    messageGreeting: "Dear Customer (IMPORTANT: Not [Your company name])", // Disclaim responsibility
-    messageClosing: "Regards,",
-    messageBody:
-      "This is a final reminder to settle your outstanding invoice of $100 for [Service/Product]. To avoid a late payment penalty of 10%, please make the payment immediately by clicking here: [Suspicious URL].", // Phishing link with urgency
-    isPhishing: true,
-    phishingType: "C",
-  },
-  {
-    id: "7",
-    senderEmail: "david.lee@example.com",
-    senderName: "David Lee",
-    subject: "New Product Launch",
-    messageGreeting: "Hello,",
-    messageClosing: "Regards,",
-    messageBody:
-      "We are excited to announce the launch of our new revolutionary product, the [Product name]! It will change the way you [Benefit of product]. Check out our website for more details and exclusive pre-order discounts: [Company website]",
-    isPhishing: false,
-    phishingType: "B",
-  },
-  {
-    id: "8",
-    senderEmail: "joboffers@fakecompany.com", // Spoofed sender email
-    senderName: "Dream Job Opportunities", // Enticing sender name
-    subject: "You've Been Selected! High-Paying Job Awaits!", // Exaggerated subject line
-    messageGreeting: "Dear [Your name],", // Personalized greeting
-    messageClosing: "Best of Luck!", // Common closing
-    messageBody:
-      "We're excited to inform you that you've been selected for a high-paying position at our company. To confirm your interest, please click the link below to complete our online application: [Suspicious URL]. Don't miss out on this amazing opportunity!", // Phishing link with urgency
-    isPhishing: true,
-    phishingType: "B",
-  },
-  {
-    id: "9",
-    senderEmail: "peter.wilson@example.com",
-    senderName: "Peter Wilson",
-    subject: "Meeting Request",
-    messageGreeting: "Dear colleague,",
-    messageClosing: "Sincerely,",
-    messageBody:
-      "I would like to schedule a meeting to discuss the upcoming project. Please let me know your availability. Thank you.",
-    isPhishing: false,
-    phishingType: null,
-  },
-  {
-    id: "10",
-    senderEmail: "training.department@fakecompany.com", // Spoofed sender email
-    senderName: "Training Department", // Generic sender name
-    subject: "Important: Update Your Training Records Now!", // Urgent subject line
-    messageGreeting: "Dear Employee,", // Generic greeting
-    messageClosing: "Regards,",
-    messageBody:
-      "To ensure compliance with company policies, please update your training records by clicking the link below: [Suspicious URL]. Failure to comply may result in disciplinary action.", // Phishing link with threat
-    isPhishing: true,
-    phishingType: "A",
-  },
-  {
-    id: "11",
-    senderEmail: "support@fakecustomercare.com", // Spoofed sender email
-    senderName: "Customer Support", // Generic sender name
-    subject: "Your Account Is On Hold: Immediate Action Required!", // Urgent subject line
-    messageGreeting: "Dear Valued Customer,", // Generic greeting
-    messageClosing: "Sincerely,",
-    messageBody:
-      "We've detected unusual activity on your account. To reactivate it, please verify your identity by clicking the link below: [Suspicious URL]. This is urgent!", // Phishing link with urgency
-    isPhishing: true,
-    phishingType: "B",
-  },
-  {
-    id: "12",
-    senderEmail: "lotterywinnings@notlegit.com", // Spoofed sender email
-    senderName: "International Lottery Commission", // Impersonating a legitimate organization
-    subject: "Congratulations! You've Won $1,000,000!", // Exaggerated subject line
-    messageGreeting: "Dear Lucky Winner,", // Generic greeting
-    messageClosing: "Sincerely,",
-    messageBody:
-      "You have been selected as the lucky winner of our $1,000,000 lottery! To claim your prize, please contact our agent immediately at [Phone number] or reply to this email with your personal information.", // Requests personal information
-    isPhishing: true,
-    phishingType: "A",
-  },
-];
 export default function Mock() {
-  const { signOut, session } = useSession();
   const [isModalVisible, setIsModalVisible] = React.useState(false);
   const [isTutorialVisible, setIsTutorialVisible] = React.useState(true);
   const [currentEmail, setCurrentEmail] = React.useState<Email | null>(null);
@@ -203,9 +54,13 @@ export default function Mock() {
 
   const [calculatedScore, setCalculatedScore] = React.useState<Stats>();
   const tutorialPages = [
-    "Welcome to the mock environment! In this tutorial, you will learn how to handle emails. Please read the instructions carefully.",
+    "In this tutorial, you will learn how to complete the test. Please read the instructions carefully.",
     "Your task is to clear out all the emails. Read each email carefully to determine if it is a phishing email or not.",
-    "If you think an email is legitimate, you can reply to it. If you suspect it is a phishing email, flag it.",
+    "For context, a phishing email is a fraudulent email that appears to be from a legitimate source. It often contains a malicious link or attachment.",
+    "Additionally, in this test you will do a bit of role-playing",
+    "You are a new employee at a company and your company has a policy of responding to all emails within 5 minutes",
+    "You will need to read each email and decide whether to interact with it or flag it as a phishing email.",
+    "The domain of the company you work for is 'under-pressure.com'. If you receive an email from this domain, it is safe to interact with.",
     "You have a time limit indicated above the mailbox. Good luck!",
   ];
 
@@ -455,7 +310,7 @@ export default function Mock() {
                         ]);
                     }}
                   >
-                    <Text style={styles.buttonText}>Reply</Text>
+                    <Text style={styles.buttonText}>Interact</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={emailStyles.flagButton}
@@ -491,7 +346,7 @@ export default function Mock() {
                   {tutorialPages[tutorialPage]}
                 </Text>
                 <View style={tutorialStyles.buttonContainer}>
-                  {tutorialPage !== 3 ? (
+                  {tutorialPage !== tutorialPages.length - 1 ? (
                     <TouchableOpacity
                       style={styles.button}
                       onPress={handleNextPage}
@@ -500,10 +355,10 @@ export default function Mock() {
                     </TouchableOpacity>
                   ) : (
                     <TouchableOpacity
-                      style={styles.button}
+                      style={[styles.button, { backgroundColor: "#4AAD52" }]}
                       onPress={handleStartTest}
                     >
-                      <Text style={styles.buttonText}>Done</Text>
+                      <Text style={styles.buttonText}>Start</Text>
                     </TouchableOpacity>
                   )}
                 </View>

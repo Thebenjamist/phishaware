@@ -20,42 +20,43 @@ import api from "@/services/api";
 const resources = [
   {
     id: 1,
-    thumbnail:
-      "https://media.defense.gov/2023/Oct/18/2003322403/1920/1080/0/231018-D-IM742-2222.JPG",
-    header: "Phishing Guidance",
-    subtitle: "How to Protect Against Evolving Phishing Attacks",
-    link: "https://www.nsa.gov/Press-Room/Press-Releases-Statements/Press-Release-View/Article/3560788/how-to-protect-against-evolving-phishing-attacks/",
+    thumbnail: "https://phishingquiz.withgoogle.com/static/share-7e4bdf41.jpg",
+    header: "Take Jigsaw's Phishing Quiz",
+    subtitle: "Can you spot when you're being phished?",
+    link: "https://phishingquiz.withgoogle.com/",
   },
   {
     id: 2,
-    thumbnail:
-      "https://www.ncsc.gov.uk/images/Artboard%205.png?mpwidth=545&mlwidth=737&twidth=961&dwidth=635&dpr=2&width=1399",
-    header: "Phishing Attacks",
-    subtitle: "Defending your organisation.",
-    link: "https://www.ncsc.gov.uk/guidance/phishing",
+    thumbnail: "https://i.ytimg.com/vi/XsOWczwRVuc/maxresdefault.jpg",
+    header: "What Is Phishing? How Do I Avoid the Bait?",
+    subtitle: "What is phishing? Phishing attacks are o...",
+    link: "https://www.youtube.com/watch?v=XsOWczwRVuc",
   },
   {
     id: 3,
-    thumbnail: "https://phishing.org/images/phishing-techniques.jpg",
-    header: "EvilProxy Phishing Attack Strikes Indeed, Targets Executives",
-    subtitle: "An in-depth look at common phishing methods.",
-    link: "https://www.infosecurity-magazine.com/news/evilproxy-phishing-attack-strikes/",
+    thumbnail:
+      "https://www.terranovasecurity.com/sites/default/files/styles/og_image/public/2024-02/social-media-phishing-scams.jpg?itok=BIEnxB8C",
+    header: "Countering The 5 Most Common Social Media Phishing Scams",
+    subtitle:
+      "Social media has created a new breed of phishing. This article will explain them so you can stay protected.",
+    link: "https://www.terranovasecurity.com/blog/most-common-social-media-phishing-scams",
   },
   {
     id: 4,
     thumbnail:
-      "https://documents.trendmicro.com/images/tex/articles/tcc-phishing-irs.jpg",
-    header: "Best Practices",
-    subtitle: "Identifying and Mitigating Phishing Attacks",
-    link: "https://www.trendmicro.com/vinfo/us/security/news/cybercrime-and-digital-threats/best-practices-identifying-and-mitigating-phishing-attacks",
+      "https://www.itgovernance.co.uk/blog/wp-content/uploads/2022/10/shutterstock_1742400716.jpg",
+    header:
+      "10 Ways to Prevent Phishing Attacks in 2023 - IT Governance UK Blog",
+    subtitle:
+      "Phishing attacks are among the most common forms of cyber crime that organisations face, so it’s crucial that you learn how to prevent scams.",
+    link: "https://www.itgovernance.co.uk/blog/10-ways-to-prevent-phishing-attacks-in-2023",
   },
   {
     id: 5,
-    thumbnail:
-      "https://images.fastcompany.com/image/upload/f_auto,c_fit,w_1920,q_auto/wp-cms-2/2024/04/influencer-marketing-how-to-target-gen-z-.webp",
-    header: "The growing threat of AI in social engineering:",
-    subtitle: " How business can mitigate risks",
-    link: "https://www.fastcompany.com/91088574/the-growing-threat-of-ai-in-social-engineering-how-business-can-mitigate-risks",
+    thumbnail: "https://www.ncsc.gov.uk/images/Artboard%205.png",
+    header: "Phishing attacks: defending your organisation",
+    subtitle: "How to defend your organisation from email phishing attacks.",
+    link: "https://www.ncsc.gov.uk/guidance/phishing",
   },
 ];
 
@@ -160,7 +161,7 @@ const styles1 = StyleSheet.create({
     gap: 10,
   },
   resourceThumbnail: {
-    width: 120,
+    width: 200,
     height: 120,
     backgroundColor: "lightgray",
   },
