@@ -6,10 +6,12 @@ const CustomModal = ({
   isModalVisible,
   setIsModalVisible,
   children,
+  noBackground,
 }: {
   isModalVisible: boolean;
   setIsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   children: React.ReactNode;
+  noBackground?: boolean;
 }) => (
   <Modal
     animationType="fade"
@@ -19,7 +21,14 @@ const CustomModal = ({
       setIsModalVisible(!isModalVisible);
     }}
   >
-    <View style={styles.modalContainer}>
+    <View
+      style={[
+        styles.modalContainer,
+        noBackground && {
+          backgroundColor: "rgba(0,0,0,0)",
+        },
+      ]}
+    >
       <View style={styles.modalView}>{children}</View>
     </View>
   </Modal>

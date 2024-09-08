@@ -8,7 +8,7 @@ export default function Welcome() {
   return (
     <ScreenLayout>
       <Image source={require("@/assets/images/icon.png")} style={styles.logo} />
-      <Text style={styles.welcomeText}>PhishAware App</Text>
+      <Text style={styles.welcomeText}>Phishaware</Text>
       <TouchableOpacity
         style={[styles.button, styles.buttonSpacing]}
         onPress={() => router.push("/sign-in")}

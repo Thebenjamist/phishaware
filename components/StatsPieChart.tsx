@@ -33,10 +33,10 @@ const StatsPieChart = ({ stats }: { stats: Stats }) => {
   } = stats;
 
   const colors = {
-    phishingLinksOpened: "#FF6F61", // Coral
-    linksCorrectlyFlagged: "#6B8E23", // Olive Drab
+    phishingLinksOpened: "#D83148", // Coral
+    linksCorrectlyFlagged: "#4AAD52", // Olive Drab
     correctlyReplied: "#90EE90", // Light Green
-    linksFalselyFlagged: "#4682B4", // Steel Blue
+    linksFalselyFlagged: "#FF6F61",
   };
 
   const data = [

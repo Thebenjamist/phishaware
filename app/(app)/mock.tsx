@@ -16,8 +16,13 @@ import CustomModal from "@/components/CustomModal";
 import { router } from "expo-router";
 import api from "@/services/api";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import TutorialModal from "@/components/mockModals/tutorialModal";
+import ScoresModal from "@/components/mockModals/scoresModal";
+import WarningModal from "@/components/mockModals/warningModal";
+import EmailModal from "@/components/mockModals/emailModal";
+import SuccessModal from "@/components/mockModals/successModal";
 
-type Email = {
+export type Email = {
   id: string;
   senderEmail: string;
   senderName: string;
@@ -30,7 +35,7 @@ type Email = {
   status?: "read" | "unread" | "flagged";
 };
 
-type scoreItem = {
+export type scoreItem = {
   id: string;
   status: string;
   isPhishing: boolean;
@@ -44,25 +49,15 @@ export default function Mock() {
   const [testStarted, setTestStarted] = React.useState(false);
   const [emails, setEmails] = React.useState<Email[]>([]);
   const [score, setScore] = React.useState<scoreItem[]>([]);
-  const [tutorialPage, setTutorialPage] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(300);
   const [showScoresModal, setShowScoresModal] = useState(false);
   const [emailsLoading, setEmailsLoading] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [pauseTimer, setPauseTimer] = useState(false);
   const [warningModalVisible, setWarningModalVisible] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
 
   const [calculatedScore, setCalculatedScore] = React.useState<Stats>();
-  const tutorialPages = [
-    "In this tutorial, you will learn how to complete the test. Please read the instructions carefully.",
-    "Your task is to clear out all the emails. Read each email carefully to determine if it is a phishing email or not.",
-    "For context, a phishing email is a fraudulent email that appears to be from a legitimate source. It often contains a malicious link or attachment.",
-    "Additionally, in this test you will do a bit of role-playing",
-    "You are a new employee at a company and your company has a policy of responding to all emails within 5 minutes",
-    "You will need to read each email and decide whether to interact with it or flag it as a phishing email.",
-    "The domain of the company you work for is 'under-pressure.com'. If you receive an email from this domain, it is safe to interact with.",
-    "You have a time limit indicated above the mailbox. Good luck!",
-  ];
 
   const submitScore = async () => {
     await api("/submit-score", "POST", { score: calculatedScore })
@@ -72,14 +67,6 @@ export default function Mock() {
       .catch((error) => {
         console.log("Error submitting score: ", error);
       });
-  };
-
-  const handleNextPage = () => {
-    if (tutorialPage < tutorialPages.length - 1) {
-      setTutorialPage(tutorialPage + 1);
-    } else {
-      setIsTutorialVisible(false);
-    }
   };
 
   const handleStartTest = () => {
@@ -101,6 +88,14 @@ export default function Mock() {
     const seconds = time % 60;
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
+  const selectRandomEmails = (emails: Email[]) => {
+    const shuffled = [...emails].sort(() => 0.5 - Math.random()).slice(0, 10);
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
 
   useEffect(() => {
     const fetchEmails = async () => {
@@ -108,11 +103,15 @@ export default function Mock() {
         const fetchedEmails = await api("/emails", "GET").then(
           (res) => res.data
         );
+        if (fetchedEmails.length === 0) throw new Error("No emails found");
+        const shuffledEmails = selectRandomEmails(fetchedEmails);
         setEmails(
-          fetchedEmails.map((email: Email) => ({ ...email, status: "unread" }))
+          shuffledEmails.map((email: Email) => ({ ...email, status: "unread" }))
         );
         setEmailsLoading(false);
       } catch (err) {
+        router.push("/");
+        alert("Failed to fetch emails. Please try again.");
         console.log("Failed to fetch emails: ", err);
       }
     };
@@ -260,183 +259,51 @@ export default function Mock() {
                 No more emails to read
               </Text>
             )}
-            <Modal visible={isModalVisible}>
-              <ScreenLayout noMargin topAligned noPadding>
-                <View style={messageStyles.header}>
-                  <View style={messageStyles.iconContainer}>
-                    <Text style={messageStyles.iconText}>
-                      {currentEmail?.senderName.charAt(0)}
-                    </Text>
-                  </View>
-                  <View style={messageStyles.detailsContainer}>
-                    <Text style={messageStyles.senderName}>
-                      {currentEmail?.senderName}
-                    </Text>
-                    <Text style={messageStyles.senderEmail}>
-                      {currentEmail?.senderEmail}
-                    </Text>
-                    <Text style={messageStyles.subject}>
-                      {currentEmail?.subject}
-                    </Text>
-                  </View>
-                </View>
-                <View style={messageStyles.message}>
-                  <Text>{currentEmail?.messageGreeting}</Text>
-                  <Text>{currentEmail?.messageBody}</Text>
-                  <Text>{currentEmail?.messageClosing}</Text>
-                </View>
+            <EmailModal
+              isModalVisible={isModalVisible}
+              setIsModalVisible={setIsModalVisible}
+              currentEmail={currentEmail!}
+              setEmails={setEmails}
+              setScore={setScore}
+              warningModalVisible={warningModalVisible}
+              setWarningModalVisible={setWarningModalVisible}
+              emails={emails}
+              score={score}
+              setPauseTimer={setPauseTimer}
+              successModalVisible={successModalVisible}
+              setSuccessModalVisible={setSuccessModalVisible}
+            />
 
-                <View style={messageStyles.actions}>
-                  <TouchableOpacity
-                    style={emailStyles.viewButton}
-                    onPress={() => {
-                      if (currentEmail?.isPhishing) {
-                        setWarningModalVisible(true);
-                        setPauseTimer(true);
-                      }
-                      setIsModalVisible(false);
-                      setEmails(
-                        emails.filter((email) => email.id !== currentEmail?.id)
-                      );
-                      currentEmail &&
-                        setScore([
-                          ...score,
-                          {
-                            id: currentEmail.id,
-                            status: "read",
-                            isPhishing: currentEmail.isPhishing,
-                            phishingType: currentEmail.phishingType,
-                          },
-                        ]);
-                    }}
-                  >
-                    <Text style={styles.buttonText}>Interact</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={emailStyles.flagButton}
-                    onPress={() => {
-                      setIsModalVisible(false);
-                      setEmails(
-                        emails.filter((email) => email.id !== currentEmail?.id)
-                      );
-                      currentEmail &&
-                        setScore([
-                          ...score,
-                          {
-                            id: currentEmail.id,
-                            status: "flagged",
-                            isPhishing: currentEmail.isPhishing,
-                            phishingType: currentEmail.phishingType,
-                          },
-                        ]);
-                    }}
-                  >
-                    <Text style={styles.buttonText}>Flag</Text>
-                  </TouchableOpacity>
-                </View>
-              </ScreenLayout>
-            </Modal>
-            <CustomModal
+            <TutorialModal
               isModalVisible={isTutorialVisible}
               setIsModalVisible={setIsTutorialVisible}
-            >
-              <View style={tutorialStyles.container}>
-                <Text style={styles.modalHeader}>Tutorial</Text>
-                <Text style={tutorialStyles.text}>
-                  {tutorialPages[tutorialPage]}
-                </Text>
-                <View style={tutorialStyles.buttonContainer}>
-                  {tutorialPage !== tutorialPages.length - 1 ? (
-                    <TouchableOpacity
-                      style={styles.button}
-                      onPress={handleNextPage}
-                    >
-                      <Text style={styles.buttonText}>Next</Text>
-                    </TouchableOpacity>
-                  ) : (
-                    <TouchableOpacity
-                      style={[styles.button, { backgroundColor: "#4AAD52" }]}
-                      onPress={handleStartTest}
-                    >
-                      <Text style={styles.buttonText}>Start</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </View>
-            </CustomModal>
+              handleStartTest={handleStartTest}
+            />
 
-            <CustomModal
+            <ScoresModal
               isModalVisible={showScoresModal}
               setIsModalVisible={setShowScoresModal}
-            >
-              <Text style={[styles.modalHeader, { marginBottom: 0 }]}>
-                {timeRemaining < 1 ? "Time Up" : "Mailbox Empty"}
-              </Text>
-              <Text style={styles.modalText}>
-                Please Review Your Scores Below:
-              </Text>
-              <View style={scoreStyles.container}>
-                <Text style={scoreStyles.scoreText}>
-                  Emails Opened: {calculatedScore?.emailsOpen}
-                </Text>
-                <Text style={[scoreStyles.scoreText, { color: "#D83148" }]}>
-                  Phishing Emails Interacted With:
-                  {calculatedScore?.phishingLinksOpened}
-                </Text>
-                <Text style={[scoreStyles.scoreText, { color: "#D83148" }]}>
-                  Emails Falsely Flagged: {calculatedScore?.linksFalselyFlagged}
-                </Text>
-                <Text style={[scoreStyles.scoreText, { color: "#4AAD52" }]}>
-                  Emails Correctly Flagged:{" "}
-                  {calculatedScore?.linksCorrectlyFlagged}
-                </Text>
-                <Text style={[scoreStyles.scoreText, { color: "#4AAD52" }]}>
-                  Correctly Replied: {calculatedScore?.correctlyReplied}
-                </Text>
-                {submitLoading ? (
-                  <LoadingSpinner />
-                ) : (
-                  <View style={scoreStyles.buttonContainer}>
-                    <TouchableOpacity
-                      style={styles.button}
-                      onPress={handleEndTest}
-                    >
-                      <Text style={styles.buttonText}>Done</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </View>
-            </CustomModal>
+              calculatedScore={calculatedScore}
+              submitLoading={submitLoading}
+              handleEndTest={handleEndTest}
+              timeRemaining={timeRemaining}
+            />
 
-            <CustomModal
+            <WarningModal
               isModalVisible={warningModalVisible}
               setIsModalVisible={setWarningModalVisible}
-            >
-              <Text
-                style={[
-                  styles.modalHeader,
-                  { marginBottom: 0, color: "#D83148" },
-                ]}
-              >
-                ALERT
-              </Text>
-              <Text style={styles.modalText}>
-                That was a phishing email! Please be careful with such emails.
-              </Text>
-              <View style={scoreStyles.container}>
-                <View style={scoreStyles.buttonContainer}>
-                  <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => {
-                      setWarningModalVisible(false);
-                      setPauseTimer(false);
-                    }}
-                  >
-                    <Text style={styles.buttonText}>Continue</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </CustomModal>
+              setPauseTimer={setPauseTimer}
+              setIsEmailModalVisible={setIsModalVisible}
+              currentEmail={currentEmail}
+            />
+
+            <SuccessModal
+              isModalVisible={successModalVisible}
+              setIsModalVisible={setSuccessModalVisible}
+              setPauseTimer={setPauseTimer}
+              setIsEmailModalVisible={setIsModalVisible}
+              currentEmail={currentEmail}
+            />
           </>
         )}
       </ScreenLayout>
@@ -556,38 +423,5 @@ const messageStyles = StyleSheet.create({
     flexDirection: "row",
     padding: 20,
     gap: 10,
-  },
-});
-
-const tutorialStyles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-    width: "100%",
-  },
-  text: {
-    fontSize: 16,
-    textAlign: "center",
-    marginBottom: 40,
-  },
-  buttonContainer: {
-    flexDirection: "column",
-    gap: 10,
-    width: "100%",
-  },
-});
-
-const scoreStyles = StyleSheet.create({
-  scoreText: {
-    fontSize: 14,
-    fontWeight: "bold",
-    marginBottom: 4,
-    textAlign: "left",
-  },
-  buttonContainer: {
-    width: "100%",
-    marginTop: 20,
-  },
-  container: {
-    width: "100%",
   },
 });

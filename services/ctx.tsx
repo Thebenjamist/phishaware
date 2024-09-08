@@ -104,7 +104,6 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const [isLoading, setIsLoading] = useState(true);
   const [session, setSession] = useState<string | null>(null);
   const router = useRouter();
-  const segments = useSegments();
   const [user, setUser] = useState<User | null>(null);
 
   const fetchUser = async () => {
@@ -115,7 +114,6 @@ export function SessionProvider({ children }: PropsWithChildren) {
       })
       .catch(console.error);
   };
-
   useEffect(() => {
     (async () => {
       let storedSession = await getSession("session");
@@ -124,16 +122,16 @@ export function SessionProvider({ children }: PropsWithChildren) {
       }
       if (storedSession) {
         setSession(storedSession);
+        scheduleRefresh(storedSession);
         if (!user) {
           await fetchUser();
         }
       } else {
-        setSession(null);
-        router.push("/welcome");
+        signOut();
       }
       setIsLoading(false);
     })();
-  }, [segments]);
+  }, []);
 
   const signIn = async (username: string, password: string) => {
     setIsLoading(true);
@@ -159,8 +157,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
           });
           await saveSession("session", sessionData);
           await fetchUser();
-
           setSession(sessionData);
+          scheduleRefresh(sessionData);
           setIsLoading(false);
           resolve();
         },
@@ -182,6 +180,26 @@ export function SessionProvider({ children }: PropsWithChildren) {
     setSession(null);
     setUser(null);
     router.push("/welcome");
+  };
+
+  const scheduleRefresh = (session: string) => {
+    const { idToken } = JSON.parse(session);
+    const jwtPayload = JSON.parse(atob(idToken.split(".")[1]));
+    const currentTime = Math.floor(Date.now() / 1000);
+    const { exp } = jwtPayload;
+    const timer = exp - currentTime - 5 * 60;
+    setTimeout(async () => {
+      setIsLoading(true);
+      const newSession = (await refreshSession(session)) as string;
+      if (!newSession) {
+        signOut();
+        setIsLoading(false);
+        return;
+      }
+      setSession(newSession);
+      setIsLoading(false);
+      scheduleRefresh(newSession);
+    }, timer * 1000);
   };
 
   return (
