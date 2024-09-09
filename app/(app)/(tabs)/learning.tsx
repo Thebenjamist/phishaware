@@ -81,9 +81,9 @@ export default function Tab() {
   }, [user]);
 
   const handleModalClose = async () => {
+    setIsModalVisible(false);
     await updateFirstTimeOpen();
     await fetchUser();
-    setIsModalVisible(false);
   };
 
   const handleResourcePress = (link: string) => {

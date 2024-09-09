@@ -55,14 +55,7 @@ function isSessionValid(session: string | null): boolean {
   const jwtPayload = JSON.parse(atob(idToken.split(".")[1]));
   const currentTime = Math.floor(Date.now() / 1000);
   const { exp } = jwtPayload;
-  const timeLeft = exp - currentTime;
-  console.log(
-    "Time left for valid session:",
-    Math.floor(timeLeft / 60),
-    "minutes",
-    timeLeft % 60,
-    "seconds"
-  );
+
   return jwtPayload.exp > currentTime;
 }
 
